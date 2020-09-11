@@ -7,6 +7,7 @@
 #include <utility>
 #include <algorithm>
 #include <cassert>
+#include <filesystem>
 
 #include <glm/glm.hpp>
 
@@ -105,9 +106,25 @@ std::map<std::string, ImgContent> load_raw_sprite_images(const std::string &tile
 	// below is a temporary version written by xiaoqiao
 	// very simple, no error handling, only for testing
 	std::map<std::string, ImgContent> mapping;
-	ImgContent img;
-	load_png(tile_dir + "/boomerang.png", &img.size, &img.data, LowerLeftOrigin);
-	mapping["boomerang"] = img;
+	// ImgContent img;
+	// load_png(tile_dir + "/boomerang.png", &img.size, &img.data, LowerLeftOrigin);
+	// mapping["boomerang"] = img;
+	namespace fs = std::filesystem;
+	for (const auto& entry : fs::directory_iterator(tile_dir)){
+		const auto filename_str = entry.path().filename().string();
+		std::string extension = filename_str.substr(filename_str.find('.')+1);
+		if (extension == "png"){
+			ImgContent img;
+			load_png(entry.path(), &img.size, &img.data, LowerLeftOrigin);
+			std::string name = filename_str.substr(0, filename_str.find('.'));
+			mapping[name] = img;
+		}
+	}
+	std::cout<<"loading sprite images of: ";
+	for (auto const& [key, val] : mapping){
+		std::cout << key << " ";
+	}
+	std::cout<<std::endl;
 	return mapping;
 }
 
