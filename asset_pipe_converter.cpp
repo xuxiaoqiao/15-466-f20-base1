@@ -12,13 +12,14 @@
 
 #include "PPU466.hpp"
 #include "read_write_chunk.hpp"
+#include "load_save_png.hpp"
 
 constexpr char USAGE_PROMPT[] = R"(
 usage:
   ./asset_pipe_converter <input-tile-dir> <output-chunk-dir> <output-header-dir>
 
 example:
-  ./build_tools_bin/asset_pipe_converter assets/tiles/ dist/assets/ generated/include/
+  ./build_tools_bin/asset_pipe_converter assets/sprites/ dist/assets/ generated/include/
 )";
 
 /**
@@ -34,8 +35,7 @@ public:
 };
 
 struct ImgContent {
-	int width;
-	int height;
+	glm::uvec2 size{};
 	std::vector<glm::u8vec4> data;
 };
 
@@ -89,17 +89,25 @@ void store_sprite_header_file(const ProcessedSprites &sprites, const std::string
 void store_sprite_chunk_file(const ProcessedSprites &sprites, const std::string &output_chunk_dir);
 
 int main(int argc, char *argv[]) {
-	if (argc != 3) {
+	if (argc != 4) {
 		std::cout << USAGE_PROMPT << std::endl;
 		return 1;
 	}
 	// TODO: implement me
+	std::map<std::string, ImgContent> raw_images = load_raw_sprite_images(argv[1]);
+	ProcessedSprites processed_sprites = process_sprite_images(raw_images);
 	return 0;
 }
 
 std::map<std::string, ImgContent> load_raw_sprite_images(const std::string &tile_dir) {
 	// TODO: implement me
-	return std::map<std::string, ImgContent>();
+	// below is a temporary version written by xiaoqiao
+	// very simple, no error handling, only for testing
+	std::map<std::string, ImgContent> mapping;
+	ImgContent img;
+	load_png(tile_dir + "/boomerang.png", &img.size, &img.data, LowerLeftOrigin);
+	mapping["boomerang"] = img;
+	return mapping;
 }
 
 ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &raw_images) {
@@ -113,10 +121,10 @@ ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &
 		const ImgContent &img = img_iterator.second;
 		int tile_index = -1;
 		int palette_index = -1;
-		if (img.height != 8 || img.width != 8) {
+		if (img.size[0] != 8 || img.size[1] != 8) {
 			throw AssetConversionException(
 				std::string("Invalid PNG asset size for ") + name + ". Should be 8x8, but actually"
-					+ std::to_string(img.width) + "x" + std::to_string(img.height));
+					+ std::to_string(img.size[0]) + "x" + std::to_string(img.size[1]));
 		}
 		std::vector<glm::u8vec4> colors;
 		// first pass: what's the colors in this img

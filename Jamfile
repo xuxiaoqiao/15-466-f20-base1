@@ -87,9 +87,10 @@ Objects $(GAME_NAMES:S=.cpp) ;
 LOCATE_TARGET = dist ; #put main in 'dist' directory
 MainFromObjects game : $(GAME_NAMES:S=$(SUFOBJ)) ;
 
-if $(OS) = MACOSX {
+if $(OS) = MACOSX || $(OS) = LINUX {
 	ASSET_CONVERTER_NAMES =
 		asset_pipe_converter
+		load_save_png
 		;
 	LOCATE_TARGET = objs ; #put objects in 'objs' directory
 	Objects $(ASSET_CONVERTER_NAMES:S=.cpp) ;
