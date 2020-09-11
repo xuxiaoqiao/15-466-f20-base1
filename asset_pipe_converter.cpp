@@ -96,6 +96,7 @@ int main(int argc, char *argv[]) {
 	// TODO: implement me
 	std::map<std::string, ImgContent> raw_images = load_raw_sprite_images(argv[1]);
 	ProcessedSprites processed_sprites = process_sprite_images(raw_images);
+	store_sprite_resources(processed_sprites, argv[2], argv[3]);
 	return 0;
 }
 
@@ -133,9 +134,9 @@ ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &
 			if (it != colors.end()) {
 				// no action required
 			} else {
-				colors.push_back(*it);
+				colors.push_back(pix);
 				if (colors.size() > 4) {
-					std::string errmsg = std::string("Too many colors used in asset " + name + ".");
+					std::string errmsg = std::string("Too many colors used in asset ") + name + ".";
 					throw AssetConversionException(errmsg);
 				}
 			}
@@ -194,6 +195,8 @@ void store_sprite_resources(
 	const std::string &output_chunk_dir,
 	const std::string &output_header_dir) {
 	// TODO: implement me
+	store_sprite_header_file(sprites, output_header_dir);
+	store_sprite_chunk_file(sprites, output_chunk_dir);
 }
 
 void store_sprite_header_file(const ProcessedSprites &sprites, const std::string &output_header_dir) {
@@ -203,11 +206,11 @@ void store_sprite_header_file(const ProcessedSprites &sprites, const std::string
 	for (const auto &m : sprites.mapping) {
 		// write f"#define ${uppercase(resource_name)}_TILE_IDX ${tile_idx}\n"
 		header_file_stream << "#define ";
-		for (const char c : m.first) { header_file_stream << toupper(c); }
+		for (const char c : m.first) { header_file_stream << (char) toupper(c); }
 		header_file_stream << "_TILE_IDX " << m.second.first << "\n";
 		// write f"#define ${uppercase(resource_name)}_PALETTE_IDX ${palette_idx}\n"
 		header_file_stream << "#define ";
-		for (const char c : m.first) { header_file_stream << toupper(c); }
+		for (const char c : m.first) { header_file_stream << (char) toupper(c); }
 		header_file_stream << "_PALETTE_IDX " << m.second.second << "\n";
 	}
 	header_file_stream.close();
