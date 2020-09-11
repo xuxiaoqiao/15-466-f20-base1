@@ -137,13 +137,13 @@ ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &
 		std::sort(colors.begin(), colors.end(),
 				  [](const glm::u8vec4 &a, const glm::u8vec4 &b) -> bool {
 					  if (a[3] != b[3]) {
-						  return a[3] < b[3];
-					  } else if (a[2] != b[2]) {
-						  return a[2] < b[2];
+						  return a[3] > b[3];
+					  } else if (a[0] != b[0]) {
+						  return a[0] > b[0];
 					  } else if (a[1] != b[1]) {
-						  return a[1] < b[1];
+						  return a[1] > b[1];
 					  } else {
-						  return a[0] < b[0];
+						  return a[2] > b[2];
 					  }
 				  });
 		assert(colors.size() <= 4);
