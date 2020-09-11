@@ -3,10 +3,12 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <fstream>
 
 #include <glm/glm.hpp>
 
 #include "PPU466.hpp"
+#include "read_write_chunk.hpp"
 
 
 constexpr char USAGE_PROMPT[] = R"(
@@ -58,6 +60,7 @@ struct ProcessedSprites {
  * @return a ProcessedSprites struct that represents the tiles palettes and mapping
  * @throw AssetConversionException if a failure happens, e.g. when too many colors are used.
  */
+// TODO(zizhuol, xiaoqiao): what's the length of tiles and palettes? should I zero-pad to expected length?
 ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &raw_images);
 
 /**
@@ -76,9 +79,12 @@ ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &
  * @throw process_sprite_images if any errors happened.
  */
 
-void store_sprite_resources(const ProcessedSprites &sprites,
-							const std::string &output_chunk_dir,
-							const std::string &output_header_dir);
+void store_sprite_resources(
+	const ProcessedSprites &sprites,
+	const std::string &output_chunk_dir,
+	const std::string &output_header_dir);
+void store_sprite_header_file(const ProcessedSprites &sprites, const std::string &output_header_dir);
+void store_sprite_chunk_file(const ProcessedSprites &sprites, const std::string &output_chunk_dir);
 
 int main(int argc, char *argv[]) {
 	if (argc != 3) {
@@ -99,8 +105,38 @@ ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &
 	return ProcessedSprites();
 }
 
-void store_sprite_resources(const ProcessedSprites &sprites,
-							const std::string &output_chunk_dir,
-							const std::string &output_header_dir) {
+void store_sprite_resources(
+	const ProcessedSprites &sprites,
+	const std::string &output_chunk_dir,
+	const std::string &output_header_dir) {
 	// TODO: implement me
 }
+
+void store_sprite_header_file(const ProcessedSprites &sprites, const std::string &output_header_dir) {
+	// TODO(xiaoqiao): create directory if not exist yet.
+	std::ofstream header_file_stream(output_header_dir + "/assets_res.h", std::ios::binary);
+	header_file_stream << "#pragma once\n";
+	for (const auto &m : sprites.mapping) {
+		// write f"#define ${uppercase(resource_name)}_TILE_IDX ${tile_idx}\n"
+		header_file_stream << "#define ";
+		for (const char c : m.first) { header_file_stream << toupper(c); }
+		header_file_stream << "_TILE_IDX " << m.second.first << "\n";
+		// write f"#define ${uppercase(resource_name)}_PALETTE_IDX ${palette_idx}\n"
+		header_file_stream << "#define ";
+		for (const char c : m.first) { header_file_stream << toupper(c); }
+		header_file_stream << "_PALETTE_IDX " << m.second.second << "\n";
+	}
+	header_file_stream.close();
+	// TODO(xiaoqiao): fstream error check
+}
+
+void store_sprite_chunk_file(const ProcessedSprites &sprites, const std::string &output_chunk_dir) {
+	// TODO(xiaoqiao): create the dir if not exist yet.
+	// TODO(xiaoqiao): file open error check
+	std::ofstream tile_stream(output_chunk_dir + "/tiles.chunk", std::ios::binary);
+	std::ofstream palette_stream(output_chunk_dir + "/palettes.chunk", std::ios::binary);
+	write_chunk("til0", sprites.tiles, &tile_stream);
+	write_chunk("plt0", sprites.palettes, &palette_stream);
+	// TODO(xiaoqiao) file stream error check
+}
+
