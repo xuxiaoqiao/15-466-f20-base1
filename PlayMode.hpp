@@ -1,5 +1,9 @@
 #include "PPU466.hpp"
 #include "Mode.hpp"
+#include "read_write_chunk.hpp"
+#include "assets_res.h"
+#include <iostream>
+#include <fstream>
 
 #include <glm/glm.hpp>
 
