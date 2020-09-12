@@ -18,50 +18,50 @@ PlayMode::PlayMode() {
 		std::cout<<"Input stream open success"<<std::endl;
 	}
 	read_chunk(tile_stream, "til0", &tile_input);
-	read_chunk(palette_stream, "pal0", &palette_input);
+	read_chunk(palette_stream, "plt0", &palette_input);
 	std::copy(tile_input.begin(),tile_input.end(), ppu.tile_table.begin()+16);
-	std::copy(palette_input.begin(), palette_input.end(), ppu.palette_table.begin()+16);
+	std::copy(palette_input.begin(), palette_input.end(), ppu.palette_table.begin());
 
 	
 
-	//TODO:
+	// TODO:
 	// you *must* use an asset pipeline of some sort to generate tiles.
 	// don't hardcode them like this!
 	// or, at least, if you do hardcode them like this,
 	//  make yourself a script that spits out the code that you paste in here
 	//   and check that script into your repository.
 
-	//Also, *don't* use these tiles in your game:
+	// Also, *don't* use these tiles in your game:
 
-	// { //use tiles 0-16 as some weird dot pattern thing:
-	// 	std::array< uint8_t, 8*8 > distance;
-	// 	for (uint32_t y = 0; y < 8; ++y) {
-	// 		for (uint32_t x = 0; x < 8; ++x) {
-	// 			float d = glm::length(glm::vec2((x + 0.5f) - 4.0f, (y + 0.5f) - 4.0f));
-	// 			d /= glm::length(glm::vec2(4.0f, 4.0f));
-	// 			distance[x+8*y] = std::max(0,std::min(255,int32_t( 255.0f * d )));
-	// 		}
-	// 	}
-	// 	for (uint32_t index = 0; index < 16; ++index) {
-	// 		PPU466::Tile tile;
-	// 		uint8_t t = (255 * index) / 16;
-	// 		for (uint32_t y = 0; y < 8; ++y) {
-	// 			uint8_t bit0 = 0;
-	// 			uint8_t bit1 = 0;
-	// 			for (uint32_t x = 0; x < 8; ++x) {
-	// 				uint8_t d = distance[x+8*y];
-	// 				if (d > t) {
-	// 					bit0 |= (1 << x);
-	// 				} else {
-	// 					bit1 |= (1 << x);
-	// 				}
-	// 			}
-	// 			tile.bit0[y] = bit0;
-	// 			tile.bit1[y] = bit1;
-	// 		}
-	// 		ppu.tile_table[index] = tile;
-	// 	}
-	// }
+	{ //use tiles 0-16 as some weird dot pattern thing:
+		std::array< uint8_t, 8*8 > distance;
+		for (uint32_t y = 0; y < 8; ++y) {
+			for (uint32_t x = 0; x < 8; ++x) {
+				float d = glm::length(glm::vec2((x + 0.5f) - 4.0f, (y + 0.5f) - 4.0f));
+				d /= glm::length(glm::vec2(4.0f, 4.0f));
+				distance[x+8*y] = std::max(0,std::min(255,int32_t( 255.0f * d )));
+			}
+		}
+		for (uint32_t index = 0; index < 16; ++index) {
+			PPU466::Tile tile;
+			uint8_t t = (255 * index) / 16;
+			for (uint32_t y = 0; y < 8; ++y) {
+				uint8_t bit0 = 0;
+				uint8_t bit1 = 0;
+				for (uint32_t x = 0; x < 8; ++x) {
+					uint8_t d = distance[x+8*y];
+					if (d > t) {
+						bit0 |= (1 << x);
+					} else {
+						bit1 |= (1 << x);
+					}
+				}
+				tile.bit0[y] = bit0;
+				tile.bit1[y] = bit1;
+			}
+			ppu.tile_table[index] = tile;
+		}
+	}
 
 	// //use sprite 32 as a "player":
 	// ppu.tile_table[32].bit0 = {
