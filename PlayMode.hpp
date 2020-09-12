@@ -33,7 +33,12 @@ struct PlayMode : Mode {
 	float background_fade = 0.0f;
 
 	//player position:
-	glm::vec2 player_at = glm::vec2(0.0f);
+	glm::vec2 player_at = glm::vec2(0.0f, 128.0f);
+
+	//fish
+	glm::vec2 fish_at = glm::vec2(240.0f, 0.0f);
+	glm::vec2 fish_velocity = glm::vec2(0.0f, 0.0f);
+	bool fish_active = false;
 
 	//----- drawing handled by PPU466 -----
 

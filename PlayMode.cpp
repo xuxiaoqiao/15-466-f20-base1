@@ -29,6 +29,8 @@ PlayMode::PlayMode() {
 		);
 	}
 
+	
+
 }
 
 PlayMode::~PlayMode() {
@@ -91,6 +93,30 @@ void PlayMode::update(float elapsed) {
 	right.downs = 0;
 	up.downs = 0;
 	down.downs = 0;
+
+	constexpr float Gravity = 20.0f;
+	if (fish_active){
+		fish_velocity.y -= Gravity * elapsed;
+		fish_at.x += fish_velocity.x * elapsed;
+		fish_at.y += fish_velocity.y * elapsed;
+		if (fish_at.y < 0.0f || fish_at.x < 0.0f || fish_at.x > 256.0f){
+			fish_active = false;
+			fish_at.y = 240;
+		}
+	} else {
+		static std::mt19937 mt;
+		if ((mt()/float(mt.max())) > 0.5f){
+			fish_active = true;
+			fish_at.y = 0.0f;
+			fish_at.x = (mt()/float(mt.max())) * 256.0f;
+			fish_velocity.x = (mt()/float(mt.max()))*40.0f - 20.0f;
+			fish_velocity.y = 80.0f;
+		}
+	}
+	
+
+	
+	
 }
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
@@ -114,6 +140,13 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	ppu.sprites[0].index = BOOMERANG_TILE_IDX;
 	ppu.sprites[0].attributes = BOOMERANG_PALETTE_IDX;
 
+	//target sprite:
+	ppu.sprites[1].x = int32_t(fish_at.x);
+	ppu.sprites[1].y = int32_t(fish_at.y);
+	ppu.sprites[1].index = FISH_TILE_IDX;
+	ppu.sprites[1].attributes = FISH_PALETTE_IDX;
+
+	
 	//--- actually draw ---
 	ppu.draw(drawable_size);
 }
