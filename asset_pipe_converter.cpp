@@ -47,7 +47,7 @@ struct ImgContent {
  *
  * @param tile_dir the directory that contains all the *.png sprites
  * @return the dict of ( key: resource name, value: PNG content )
- * @throw AssetConversionException if a failure happens
+ * @throw exception if a failure happens
  */
 std::map<std::string, ImgContent> load_raw_sprite_images(const std::string &tile_dir);
 
@@ -63,7 +63,7 @@ struct ProcessedSprites {
  *
  * @param raw_images the raw sprite images, returned by load_raw_sprite_images()
  * @return a ProcessedSprites struct that represents the tiles palettes and mapping
- * @throw AssetConversionException if a failure happens, e.g. when too many colors are used.
+ * @throw exception if a failure happens, e.g. when too many colors are used.
  */
 ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &raw_images);
 
@@ -80,7 +80,7 @@ ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &
  * @param output_header_dir the destnation for generated c++ header files
  *   Should be either relative to current working directory, or an absolute path.
  *   Will be created automatically if it doesn't exist.
- * @throw process_sprite_images if any errors happened.
+ * @throw exception if any errors happened.
  */
 
 void store_sprite_resources(
@@ -184,6 +184,9 @@ ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &
 		} else {
 			palettes.push_back(p);
 			palette_index = palettes.size() - 1;
+			if (palettes.size() > 8) {
+				throw AssetConversionException("Too many palettes, exceeds 8");
+			}
 		}
 		printf("palette idx for %s: %d\n", name.c_str(), palette_index);
 		// TODO(add check for palettes size too long)
@@ -205,6 +208,9 @@ ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &
 		tiles.push_back(t);
 		tile_index = tiles.size() - 1;
 		printf("tile idx for %s: %d\n", name.c_str(), tile_index);
+		if (tiles.size() > 16 * 16) {
+			throw AssetConversionException("Too many tiles: exceeds 16*16");
+		}
 		mapping[name] = std::make_pair(tile_index, palette_index);
 	}
 	return ProcessedSprites{std::move(tiles), std::move(palettes), std::move(mapping)};
