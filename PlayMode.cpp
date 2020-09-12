@@ -9,14 +9,29 @@
 #include <random>
 
 PlayMode::PlayMode() {
-	//TODO:
+	std::vector<PPU466::Tile> tile_input;
+	std::vector<PPU466::Palette> palette_input;
+	//TODO: decide which kind of path to use
+	std::ifstream tile_stream(data_path("assets/tiles.chunk"), std::ios::binary);
+	std::ifstream palette_stream(data_path("assets/palettes.chunk"), std::ios::binary);
+	if (tile_stream.is_open() && palette_stream.is_open()){
+		std::cout<<"Input stream open success"<<std::endl;
+	}
+	read_chunk(tile_stream, "til0", &tile_input);
+	read_chunk(palette_stream, "plt0", &palette_input);
+	std::copy(tile_input.begin(),tile_input.end(), ppu.tile_table.begin()+16);
+	std::copy(palette_input.begin(), palette_input.end(), ppu.palette_table.begin());
+
+	
+
+	// TODO:
 	// you *must* use an asset pipeline of some sort to generate tiles.
 	// don't hardcode them like this!
 	// or, at least, if you do hardcode them like this,
 	//  make yourself a script that spits out the code that you paste in here
 	//   and check that script into your repository.
 
-	//Also, *don't* use these tiles in your game:
+	// Also, *don't* use these tiles in your game:
 
 	{ //use tiles 0-16 as some weird dot pattern thing:
 		std::array< uint8_t, 8*8 > distance;
@@ -48,59 +63,59 @@ PlayMode::PlayMode() {
 		}
 	}
 
-	//use sprite 32 as a "player":
-	ppu.tile_table[32].bit0 = {
-		0b01111110,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b11111111,
-		0b01111110,
-	};
-	ppu.tile_table[32].bit1 = {
-		0b00000000,
-		0b00000000,
-		0b00011000,
-		0b00100100,
-		0b00000000,
-		0b00100100,
-		0b00000000,
-		0b00000000,
-	};
+	// //use sprite 32 as a "player":
+	// ppu.tile_table[32].bit0 = {
+	// 	0b01111110,
+	// 	0b11111111,
+	// 	0b11111111,
+	// 	0b11111111,
+	// 	0b11111111,
+	// 	0b11111111,
+	// 	0b11111111,
+	// 	0b01111110,
+	// };
+	// ppu.tile_table[32].bit1 = {
+	// 	0b00000000,
+	// 	0b00000000,
+	// 	0b00011000,
+	// 	0b00100100,
+	// 	0b00000000,
+	// 	0b00100100,
+	// 	0b00000000,
+	// 	0b00000000,
+	// };
 
-	//makes the outside of tiles 0-16 solid:
-	ppu.palette_table[0] = {
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-	};
+	// //makes the outside of tiles 0-16 solid:
+	// ppu.palette_table[0] = {
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0x00),
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0x00),
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+	// };
 
-	//makes the center of tiles 0-16 solid:
-	ppu.palette_table[1] = {
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-	};
+	// //makes the center of tiles 0-16 solid:
+	// ppu.palette_table[1] = {
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0x00),
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0x00),
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+	// };
 
-	//used for the player:
-	ppu.palette_table[7] = {
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0xff, 0xff, 0x00, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-	};
+	// //used for the player:
+	// ppu.palette_table[7] = {
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0x00),
+	// 	glm::u8vec4(0xff, 0xff, 0x00, 0xff),
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+	// };
 
-	//used for the misc other sprites:
-	ppu.palette_table[6] = {
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-		glm::u8vec4(0x88, 0x88, 0xff, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0xff),
-		glm::u8vec4(0x00, 0x00, 0x00, 0x00),
-	};
+	// //used for the misc other sprites:
+	// ppu.palette_table[6] = {
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0x00),
+	// 	glm::u8vec4(0x88, 0x88, 0xff, 0xff),
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0xff),
+	// 	glm::u8vec4(0x00, 0x00, 0x00, 0x00),
+	// };
 
 }
 
@@ -193,8 +208,8 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	//player sprite:
 	ppu.sprites[0].x = int32_t(player_at.x);
 	ppu.sprites[0].y = int32_t(player_at.y);
-	ppu.sprites[0].index = 32;
-	ppu.sprites[0].attributes = 7;
+	ppu.sprites[0].index = 16;
+	ppu.sprites[0].attributes = 0;
 
 	//some other misc sprites:
 	for (uint32_t i = 1; i < 63; ++i) {
