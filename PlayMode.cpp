@@ -12,8 +12,8 @@ PlayMode::PlayMode() {
 	std::vector<PPU466::Tile> tile_input;
 	std::vector<PPU466::Palette> palette_input;
 	//TODO: decide which kind of path to use
-	std::ifstream tile_stream("assets/tiles.chunk", std::ios::binary);
-	std::ifstream palette_stream("assets/palettes.chunk", std::ios::binary);
+	std::ifstream tile_stream(data_path("assets/tiles.chunk"), std::ios::binary);
+	std::ifstream palette_stream(data_path("assets/palettes.chunk"), std::ios::binary);
 	if (tile_stream.is_open() && palette_stream.is_open()){
 		std::cout<<"Input stream open success"<<std::endl;
 	}
