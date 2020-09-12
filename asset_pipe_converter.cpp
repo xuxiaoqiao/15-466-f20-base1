@@ -15,6 +15,8 @@
 #include "read_write_chunk.hpp"
 #include "load_save_png.hpp"
 
+namespace fs = std::filesystem;
+
 constexpr char USAGE_PROMPT[] = R"(
 usage:
   ./asset_pipe_converter <input-tile-dir> <output-chunk-dir> <output-header-dir>
@@ -63,7 +65,6 @@ struct ProcessedSprites {
  * @return a ProcessedSprites struct that represents the tiles palettes and mapping
  * @throw AssetConversionException if a failure happens, e.g. when too many colors are used.
  */
-// TODO(zizhuol, xiaoqiao): what's the length of tiles and palettes? should I zero-pad to expected length?
 ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &raw_images);
 
 /**
@@ -95,21 +96,20 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	// TODO: implement me
-	std::map<std::string, ImgContent> raw_images = load_raw_sprite_images(argv[1]);
-	ProcessedSprites processed_sprites = process_sprite_images(raw_images);
-	store_sprite_resources(processed_sprites, argv[2], argv[3]);
-	return 0;
+	try {
+		std::map<std::string, ImgContent> raw_images = load_raw_sprite_images(argv[1]);
+		ProcessedSprites processed_sprites = process_sprite_images(raw_images);
+		store_sprite_resources(processed_sprites, argv[2], argv[3]);
+		return 0;
+	} catch (const std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		return 1;
+	}
+	return 1;
 }
 
 std::map<std::string, ImgContent> load_raw_sprite_images(const std::string &tile_dir) {
-	// TODO: implement me
-	// below is a temporary version written by xiaoqiao
-	// very simple, no error handling, only for testing
 	std::map<std::string, ImgContent> mapping;
-	// ImgContent img;
-	// load_png(tile_dir + "/boomerang.png", &img.size, &img.data, LowerLeftOrigin);
-	// mapping["boomerang"] = img;
-	namespace fs = std::filesystem;
 	for (const auto& entry : fs::directory_iterator(tile_dir)){
 		const auto filename_str = entry.path().filename().string();
 		std::string extension = filename_str.substr(filename_str.find('.')+1);
@@ -129,8 +129,6 @@ std::map<std::string, ImgContent> load_raw_sprite_images(const std::string &tile
 }
 
 ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &raw_images) {
-	// TODO(xiaoqiao): origin point of images? start from lower-left corer?
-	// TODO: implement me
 	std::vector<PPU466::Tile> tiles;
 	std::vector<PPU466::Palette> palettes;
 	std::map<std::string, std::pair<int,int>> mapping;
@@ -158,18 +156,18 @@ ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &
 				}
 			}
 		}
-		// sort colors in a canonical order: First order by alpha in desc order,
-		// on tie, order by red in desc order, then by green, then by blue
+		// sort colors in a canonical order: First order by alpha in ascending order,
+		// on tie, order by red in ascending order, then by green, then by blue
 		std::sort(colors.begin(), colors.end(),
 				  [](const glm::u8vec4 &a, const glm::u8vec4 &b) -> bool {
 					  if (a[3] != b[3]) {
-						  return a[3] > b[3];
+						  return a[3] < b[3];
 					  } else if (a[0] != b[0]) {
-						  return a[0] > b[0];
+						  return a[0] < b[0];
 					  } else if (a[1] != b[1]) {
-						  return a[1] > b[1];
+						  return a[1] < b[1];
 					  } else {
-						  return a[2] > b[2];
+						  return a[2] < b[2];
 					  }
 				  });
 		assert(colors.size() <= 4);
@@ -178,12 +176,16 @@ ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &
 		PPU466::Palette p;
 		std::copy(colors.begin(), colors.end(), p.begin());
 		const auto palette_it = std::find(palettes.begin(), palettes.end(), p);
+		for (const auto &c : p) {
+			printf("Colors used in %s: #%02hhx%02hhx%02hhx%02hhx\n", name.c_str(), c.x, c.y, c.z, c.w);
+		}
 		if (palette_it != palettes.end()) {
 			palette_index = std::distance(palettes.begin(), palette_it);
 		} else {
 			palettes.push_back(p);
 			palette_index = palettes.size() - 1;
 		}
+		printf("palette idx for %s: %d\n", name.c_str(), palette_index);
 		// TODO(add check for palettes size too long)
 		// second pass: convert the png content to tiles
 		// TODO(xiaoqiao): is this zero initialization?
@@ -202,6 +204,7 @@ ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &
  		}
 		tiles.push_back(t);
 		tile_index = tiles.size() - 1;
+		printf("tile idx for %s: %d\n", name.c_str(), tile_index);
 		mapping[name] = std::make_pair(tile_index, palette_index);
 	}
 	return ProcessedSprites{std::move(tiles), std::move(palettes), std::move(mapping)};
@@ -211,14 +214,16 @@ void store_sprite_resources(
 	const ProcessedSprites &sprites,
 	const std::string &output_chunk_dir,
 	const std::string &output_header_dir) {
-	// TODO: implement me
 	store_sprite_header_file(sprites, output_header_dir);
 	store_sprite_chunk_file(sprites, output_chunk_dir);
 }
 
 void store_sprite_header_file(const ProcessedSprites &sprites, const std::string &output_header_dir) {
-	// TODO(xiaoqiao): create directory if not exist yet.
+	fs::create_directories(output_header_dir);
 	std::ofstream header_file_stream(output_header_dir + "/assets_res.h", std::ios::binary);
+	if (!header_file_stream) {
+		throw AssetConversionException("Error opening assets_res.h");
+	}
 	header_file_stream << "#pragma once\n";
 	for (const auto &m : sprites.mapping) {
 		// write f"#define ${uppercase(resource_name)}_TILE_IDX ${tile_idx}\n"
@@ -230,17 +235,23 @@ void store_sprite_header_file(const ProcessedSprites &sprites, const std::string
 		for (const char c : m.first) { header_file_stream << (char) toupper(c); }
 		header_file_stream << "_PALETTE_IDX " << m.second.second << "\n";
 	}
+	if (header_file_stream.fail()) {
+		throw AssetConversionException("Error writing to assets_res.h");
+	}
 	header_file_stream.close();
-	// TODO(xiaoqiao): fstream error check
 }
 
 void store_sprite_chunk_file(const ProcessedSprites &sprites, const std::string &output_chunk_dir) {
-	// TODO(xiaoqiao): create the dir if not exist yet.
-	// TODO(xiaoqiao): file open error check
+	fs::create_directories(output_chunk_dir);
 	std::ofstream tile_stream(output_chunk_dir + "/tiles.chunk", std::ios::binary);
 	std::ofstream palette_stream(output_chunk_dir + "/palettes.chunk", std::ios::binary);
+	if (!tile_stream || !palette_stream) {
+		throw AssetConversionException("error opening chunk files");
+	}
 	write_chunk("til0", sprites.tiles, &tile_stream);
 	write_chunk("plt0", sprites.palettes, &palette_stream);
-	// TODO(xiaoqiao) file stream error check
+	if (tile_stream.fail() || palette_stream.fail()) {
+		throw AssetConversionException("error writing chunk files");
+	}
 }
 
