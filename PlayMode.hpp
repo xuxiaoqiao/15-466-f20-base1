@@ -20,6 +20,7 @@ struct PlayMode : Mode {
 	virtual bool handle_event(SDL_Event const &, glm::uvec2 const &window_size) override;
 	virtual void update(float elapsed) override;
 	virtual void draw(glm::uvec2 const &drawable_size) override;
+	void update_target(std::vector<glm::vec2>& at, std::vector<glm::vec2>& velocity, std::vector<bool>& active, uint8_t num, float elapsed);
 
 	//----- game state -----
 
@@ -36,9 +37,25 @@ struct PlayMode : Mode {
 	glm::vec2 player_at = glm::vec2(0.0f, 128.0f);
 
 	//fish
-	glm::vec2 fish_at = glm::vec2(240.0f, 0.0f);
-	glm::vec2 fish_velocity = glm::vec2(0.0f, 0.0f);
-	bool fish_active = false;
+	std::vector<glm::vec2> fish_at;
+	std::vector<glm::vec2> fish_velocity;
+	std::vector<bool> fish_active;
+
+	uint8_t num_fish = 10;
+
+	//whale
+	std::vector<glm::vec2> whale_at;
+	std::vector<glm::vec2> whale_velocity;
+	std::vector<bool> whale_active;
+
+	uint8_t num_whale = 2;
+
+	//bomb
+	std::vector<glm::vec2> bomb_at;
+	std::vector<glm::vec2> bomb_velocity;
+	std::vector<bool> bomb_active;
+
+	uint8_t num_bomb = 1;
 
 	//----- drawing handled by PPU466 -----
 

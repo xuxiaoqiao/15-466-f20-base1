@@ -29,6 +29,23 @@ PlayMode::PlayMode() {
 		);
 	}
 
+	for (uint32_t i=0; i<num_fish; i++){
+		fish_at.push_back(glm::vec2(0.0f, 240.0f));
+		fish_velocity.push_back(glm::vec2(0.0f, 0.0f));
+		fish_active.push_back(false);
+	}
+
+	for (uint32_t i=0; i<num_whale; i++){
+		whale_at.push_back(glm::vec2(0.0f, 240.0f));
+		whale_velocity.push_back(glm::vec2(0.0f, 0.0f));
+		whale_active.push_back(false);
+	}
+
+	for (uint32_t i=0; i<num_bomb; i++){
+		bomb_at.push_back(glm::vec2(0.0f, 240.0f));
+		bomb_velocity.push_back(glm::vec2(0.0f, 0.0f));
+		bomb_active.push_back(false);
+	}
 	
 
 }
@@ -75,6 +92,31 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 	return false;
 }
 
+
+void PlayMode::update_target(std::vector<glm::vec2>& at, std::vector<glm::vec2>& velocity, std::vector<bool>& active, uint8_t num, float elapsed){
+	constexpr float Gravity = 20.0f;
+	for (int i=0; i<num; i++){
+		if (active[i]){
+			velocity[i].y -= Gravity * elapsed;
+			at[i].x += velocity[i].x * elapsed;
+			at[i].y += velocity[i].y * elapsed;
+			if (at[i].y < 0.0f || at[i].x < 0.0f || at[i].x > 256.0f){
+				active[i] = false;
+				at[i].y = 240;
+			}
+		} else {
+			static std::mt19937 mt;
+			if ((mt()/float(mt.max())) < 0.01f){
+				active[i] = true;
+			 	at[i].y = 0.0f;
+				at[i].x = (mt()/float(mt.max())) * 256.0f;
+				velocity[i].x = (mt()/float(mt.max()))*40.0f - 20.0f;
+				velocity[i].y = 80.0f;
+			}
+		}
+	}
+}
+
 void PlayMode::update(float elapsed) {
 
 	//slowly rotates through [0,1):
@@ -94,30 +136,14 @@ void PlayMode::update(float elapsed) {
 	up.downs = 0;
 	down.downs = 0;
 
-	constexpr float Gravity = 20.0f;
-	if (fish_active){
-		fish_velocity.y -= Gravity * elapsed;
-		fish_at.x += fish_velocity.x * elapsed;
-		fish_at.y += fish_velocity.y * elapsed;
-		if (fish_at.y < 0.0f || fish_at.x < 0.0f || fish_at.x > 256.0f){
-			fish_active = false;
-			fish_at.y = 240;
-		}
-	} else {
-		static std::mt19937 mt;
-		if ((mt()/float(mt.max())) > 0.5f){
-			fish_active = true;
-			fish_at.y = 0.0f;
-			fish_at.x = (mt()/float(mt.max())) * 256.0f;
-			fish_velocity.x = (mt()/float(mt.max()))*40.0f - 20.0f;
-			fish_velocity.y = 80.0f;
-		}
-	}
-	
 
-	
-	
+
+	update_target(fish_at, fish_velocity, fish_active, num_fish, elapsed);
+	update_target(whale_at, whale_velocity, whale_active, num_whale, elapsed);
+	update_target(bomb_at, bomb_velocity, bomb_active, num_bomb, elapsed);
+
 }
+
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	//--- set ppu state based on game state ---
@@ -141,10 +167,26 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	ppu.sprites[0].attributes = BOOMERANG_PALETTE_IDX;
 
 	//target sprite:
-	ppu.sprites[1].x = int32_t(fish_at.x);
-	ppu.sprites[1].y = int32_t(fish_at.y);
-	ppu.sprites[1].index = FISH_TILE_IDX;
-	ppu.sprites[1].attributes = FISH_PALETTE_IDX;
+	for (int i=0; i<num_fish; i++){
+		ppu.sprites[i+1].x = int32_t(fish_at[i].x);
+		ppu.sprites[i+1].y = int32_t(fish_at[i].y);
+		ppu.sprites[i+1].index = FISH_TILE_IDX;
+		ppu.sprites[i+1].attributes = FISH_PALETTE_IDX;
+	}
+
+	for (int i=0; i<num_whale; i++){
+		ppu.sprites[i+num_fish+1].x = int32_t(whale_at[i].x);
+		ppu.sprites[i+num_fish+1].y = int32_t(whale_at[i].y);
+		ppu.sprites[i+num_fish+1].index = WHALE_TILE_IDX;
+		ppu.sprites[i+num_fish+1].attributes = WHALE_PALETTE_IDX;
+	}
+
+	for (int i=0; i<num_bomb; i++){
+		ppu.sprites[i+num_fish+num_whale+1].x = int32_t(bomb_at[i].x);
+		ppu.sprites[i+num_fish+num_whale+1].y = int32_t(bomb_at[i].y);
+		ppu.sprites[i+num_fish+num_whale+1].index = BOMB_TILE_IDX;
+		ppu.sprites[i+num_fish+num_whale+1].attributes = BOMB_PALETTE_IDX;
+	}
 
 	
 	//--- actually draw ---
