@@ -72,6 +72,11 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			down.downs += 1;
 			down.pressed = true;
 			return true;
+		} else if (evt.key.keysym.sym == SDLK_SPACE) {
+			// TODO: implement me
+			space_key.downs += 1;
+			space_key.pressed = true;
+			return true;
 		}
 	} else if (evt.type == SDL_KEYUP) {
 		if (evt.key.keysym.sym == SDLK_LEFT) {
@@ -85,6 +90,9 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			return true;
 		} else if (evt.key.keysym.sym == SDLK_DOWN) {
 			down.pressed = false;
+			return true;
+		} else if (evt.key.keysym.sym == SDLK_SPACE) {
+			space_key.pressed = false;
 			return true;
 		}
 	}
@@ -124,17 +132,43 @@ void PlayMode::update(float elapsed) {
 	background_fade += elapsed / 10.0f;
 	background_fade -= std::floor(background_fade);
 
-	constexpr float PlayerSpeed = 30.0f;
-	if (left.pressed) player_at.x -= PlayerSpeed * elapsed;
-	if (right.pressed) player_at.x += PlayerSpeed * elapsed;
-	if (down.pressed) player_at.y -= PlayerSpeed * elapsed;
-	if (up.pressed) player_at.y += PlayerSpeed * elapsed;
+	// constexpr float PlayerSpeed = 30.0f;
+	// if (left.pressed) boomerang_at.x -= PlayerSpeed * elapsed;
+	// if (right.pressed) boomerang_at.x += PlayerSpeed * elapsed;
+	// if (down.pressed) boomerang_at.y -= PlayerSpeed * elapsed;
+	// if (up.pressed) boomerang_at.y += PlayerSpeed * elapsed;
 
 	//reset button press counters:
 	left.downs = 0;
 	right.downs = 0;
 	up.downs = 0;
 	down.downs = 0;
+	space_key.downs = 0;
+
+	if (space_key.pressed) {
+		if (boomerang_state == BoomerangState::INACTIVE) {
+			boomerang_state = BoomerangState::HOLDING;
+			boomerang_holding_time = elapsed;
+		} else if (boomerang_state == BoomerangState::HOLDING) {
+			boomerang_holding_time += elapsed;
+		}
+	} else {
+		if (boomerang_state == BoomerangState::HOLDING) {
+			boomerang_state = BoomerangState::FLYING;
+			boomerang_vec_x =
+				std::min<double>(BOOMERANG_INIT_SPEED_COEFFICIENT * boomerang_holding_time, BOOMERANG_MAX_SPEED);
+		}
+	}
+
+	if (boomerang_state == BoomerangState::FLYING) {
+		boomerang_at.x += boomerang_vec_x * elapsed;
+		boomerang_vec_x -= BOOMERANG_ACCELERATION * elapsed;
+		if (boomerang_at.x <= 0) {
+			boomerang_vec_x = 0;
+			boomerang_state = BoomerangState::INACTIVE;
+			boomerang_at.x = 0;
+		}
+	}
 
 
 
@@ -157,12 +191,13 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	);
 
 	//background scroll:
-	ppu.background_position.x = int32_t(-0.5f * player_at.x);
-	ppu.background_position.y = int32_t(-0.5f * player_at.y);
+	// TODO: remove this if it's no longer needed -- xiaoqiao
+	// ppu.background_position.x = int32_t(-0.5f * boomerang_at.x);
+	// ppu.background_position.y = int32_t(-0.5f * boomerang_at.y);
 
 	//player sprite:
-	ppu.sprites[0].x = int32_t(player_at.x);
-	ppu.sprites[0].y = int32_t(player_at.y);
+	ppu.sprites[0].x = uint8_t(std::min<double>(boomerang_at.x, 255.0));
+	ppu.sprites[0].y = uint8_t(boomerang_at.y);
 	ppu.sprites[0].index = BOOMERANG_TILE_IDX;
 	ppu.sprites[0].attributes = BOOMERANG_PALETTE_IDX;
 
