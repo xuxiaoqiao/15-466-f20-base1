@@ -190,16 +190,19 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		0xff
 	);
 
-	//background scroll:
-	// TODO: remove this if it's no longer needed -- xiaoqiao
-	// ppu.background_position.x = int32_t(-0.5f * boomerang_at.x);
-	// ppu.background_position.y = int32_t(-0.5f * boomerang_at.y);
+	// background scroll feature removed
 
 	//player sprite:
 	ppu.sprites[0].x = uint8_t(std::min<double>(boomerang_at.x, 255.0));
 	ppu.sprites[0].y = uint8_t(boomerang_at.y);
-	ppu.sprites[0].index = BOOMERANG_TILE_IDX;
-	ppu.sprites[0].attributes = BOOMERANG_PALETTE_IDX;
+	if (boomerang_state != BoomerangState::FLYING || boomerang_vec_x >= 0.0) {
+		ppu.sprites[0].index = BOOMERANG_RIGHT_TILE_IDX;
+		ppu.sprites[0].attributes = BOOMERANG_RIGHT_PALETTE_IDX;
+	} else {
+		ppu.sprites[0].index = BOOMERANG_LEFT_TILE_IDX;
+		ppu.sprites[0].attributes = BOOMERANG_LEFT_PALETTE_IDX;
+	}
+
 
 	//target sprite:
 	for (int i=0; i<num_fish; i++){

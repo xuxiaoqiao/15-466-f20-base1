@@ -34,13 +34,13 @@ struct PlayMode : Mode {
 	//some weird background animation:
 	float background_fade = 0.0f;
 
-	//boomerang:
+	//boomerang
 	glm::vec2 boomerang_at = glm::vec2(0.0f, 128.0f);
 	double boomerang_vec_x = 0.0;
 	enum class BoomerangState { INACTIVE, HOLDING, FLYING };
 	BoomerangState boomerang_state = BoomerangState::INACTIVE;
 	double boomerang_holding_time = 0.0; // only used when boomerang == HOLDING
-	static constexpr double BOOMERANG_INIT_SPEED_COEFFICIENT = 200;
+	static constexpr double BOOMERANG_INIT_SPEED_COEFFICIENT = 300;
 	static constexpr double BOOMERANG_ACCELERATION = 100;
 	const double BOOMERANG_MAX_SPEED = sqrt(256 * 2 * BOOMERANG_ACCELERATION);
 
