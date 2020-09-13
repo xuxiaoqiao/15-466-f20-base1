@@ -116,6 +116,26 @@ void PlayMode::update_target(std::vector<glm::vec2>& at, std::vector<glm::vec2>&
 		}
 	}
 }
+bool pt_in(float pt_x,float pt_y, glm::vec2 target){
+	if (pt_x>=target.x && pt_x<=target.x+8 && pt_y >= target.y && pt_y<=target.y+8){
+		return true;
+	}
+	return false;
+}
+
+void check_hit(std::vector<glm::vec2>& at, glm::vec2 p, std::vector<bool>& active){
+	for(int i = 0; i<at.size();i++){
+		if(at[i].y == 240){
+			continue;
+		}
+		bool hit = pt_in(p.x,p.y,at[i]) || pt_in(p.x+8,p.y,at[i]) 
+					|| pt_in(p.x+8,p.y+8,at[i]) || pt_in(p.x,p.y+8,at[i]);
+		if(hit){
+			active[i] = false;
+			at[i].y = 240;
+		}
+	}
+}
 
 void PlayMode::update(float elapsed) {
 
@@ -141,6 +161,12 @@ void PlayMode::update(float elapsed) {
 	update_target(fish_at, fish_velocity, fish_active, num_fish, elapsed);
 	update_target(whale_at, whale_velocity, whale_active, num_whale, elapsed);
 	update_target(bomb_at, bomb_velocity, bomb_active, num_bomb, elapsed);
+
+	//check if boomrang hit target
+	check_hit(fish_at, player_at, fish_active);
+	check_hit(whale_at,player_at, whale_active);
+	check_hit(bomb_at, player_at,bomb_active);
+
 
 }
 
