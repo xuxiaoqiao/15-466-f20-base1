@@ -87,42 +87,13 @@ PlayMode::~PlayMode() {
 bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) {
 
 	if (evt.type == SDL_KEYDOWN) {
-		if (evt.key.keysym.sym == SDLK_LEFT) {
-			left.downs += 1;
-			left.pressed = true;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_RIGHT) {
-			right.downs += 1;
-			right.pressed = true;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_UP) {
-			up.downs += 1;
-			up.pressed = true;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_DOWN) {
-			down.downs += 1;
-			down.pressed = true;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_SPACE) {
-			// TODO: implement me
+		if (evt.key.keysym.sym == SDLK_SPACE) {
 			space_key.downs += 1;
 			space_key.pressed = true;
 			return true;
 		}
 	} else if (evt.type == SDL_KEYUP) {
-		if (evt.key.keysym.sym == SDLK_LEFT) {
-			left.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_RIGHT) {
-			right.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_UP) {
-			up.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_DOWN) {
-			down.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_SPACE) {
+		if (evt.key.keysym.sym == SDLK_SPACE) {
 			space_key.pressed = false;
 			return true;
 		}
@@ -173,6 +144,7 @@ void check_hit(std::vector<glm::vec2>& at, glm::vec2 p, std::vector<bool>& activ
 			active[i] = false;
 			at[i].y = 240;
 			score += pts;
+			score = std::max(score, 0);
 		}
 	}
 }
@@ -191,10 +163,6 @@ void PlayMode::update(float elapsed) {
 	background_fade -= std::floor(background_fade);
 
 	//reset button press counters:
-	left.downs = 0;
-	right.downs = 0;
-	up.downs = 0;
-	down.downs = 0;
 	space_key.downs = 0;
 
 	if (space_key.pressed) {
