@@ -131,7 +131,7 @@ bool pt_in(float pt_x,float pt_y, glm::vec2 target){
 	return false;
 }
 
-void check_hit(std::vector<glm::vec2>& at, glm::vec2 p, std::vector<bool>& active){
+void check_hit(std::vector<glm::vec2>& at, glm::vec2 p, std::vector<bool>& active, int pts){
 	for(int i = 0; i<at.size();i++){
 		if(at[i].y == 240){
 			continue;
@@ -141,12 +141,13 @@ void check_hit(std::vector<glm::vec2>& at, glm::vec2 p, std::vector<bool>& activ
 		if(hit){
 			active[i] = false;
 			at[i].y = 240;
+			score += pts;
 		}
 	}
 }
 
 void PlayMode::update(float elapsed) {
-
+	time_remain -= elapsed;
 	//slowly rotates through [0,1):
 	// (will be used to set background color)
 	background_fade += elapsed / 10.0f;
@@ -197,9 +198,9 @@ void PlayMode::update(float elapsed) {
 	update_target(bomb_at, bomb_velocity, bomb_active, num_bomb, elapsed);
 
 	//check if boomrang hit target
-	check_hit(fish_at, boomerang_at, fish_active);
-	check_hit(whale_at,boomerang_at, whale_active);
-	check_hit(bomb_at, boomerang_at,bomb_active);
+	check_hit(fish_at, boomerang_at, fish_active,1);
+	check_hit(whale_at,boomerang_at, whale_active,10);
+	check_hit(bomb_at, boomerang_at,bomb_active,-10);
 
 
 }
@@ -252,6 +253,15 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		ppu.sprites[i+num_fish+num_whale+1].attributes = BOMB_PALETTE_IDX;
 	}
 
+	int time_sprites_begin = score_sprites_begin + 3;
+	std::array<int> time_digits = {(int)time_remain/10, (int)time_remain%10};
+
+	for(int i = 0; i<2;i++){
+		ppu.sprites[i+time_sprites_begin].x = 8*(i+1);
+		ppu.sprites[i+time_sprites_begin].y =239-8;
+		ppu.sprites[i+time_sprites_begin].index = NUMBER_TILE_IDX[time_digits[i]];
+		ppu.sprites[i+time_sprites_begin].attributes = NUMBER_PALETTE_IDX[time_digits[i]];
+	}
 	
 	//--- actually draw ---
 	ppu.draw(drawable_size);
