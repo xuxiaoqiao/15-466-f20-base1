@@ -143,6 +143,7 @@ void check_hit(std::vector<glm::vec2>& at, glm::vec2 p, std::vector<bool>& activ
 			active[i] = false;
 			at[i].y = 240;
 			score += pts;
+			score = std::max(score, 0);
 		}
 	}
 }
