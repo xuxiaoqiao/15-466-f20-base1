@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <random>
+#include <array>
 
 PlayMode::PlayMode() {
 	std::vector<PPU466::Tile> tile_input;
@@ -253,8 +254,50 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		ppu.sprites[i+num_fish+num_whale+1].attributes = BOMB_PALETTE_IDX;
 	}
 
+	constexpr int SCORE_DISPLAY_WIDTH = 3;
+	int score_sprites_begin = num_fish + num_whale + num_bomb + 1;
+	constexpr std::array<uint8_t, 10> NUMBERS_TILE_IDX = {
+		ZERO_TILE_IDX,
+		ONE_TILE_IDX,
+		TWO_TILE_IDX,
+		THREE_TILE_IDX,
+		FOUR_TILE_IDX,
+		FIVE_TILE_IDX,
+		SIX_TILE_IDX,
+		SEVEN_TILE_IDX,
+		EIGHT_TILE_IDX,
+		NINE_TILE_IDX
+	};
+	constexpr std::array<uint8_t, 10> NUMBERS_PALETTE_IDX = {
+		ZERO_PALETTE_IDX,
+		ONE_PALETTE_IDX,
+		TWO_PALETTE_IDX,
+		THREE_PALETTE_IDX,
+		FOUR_PALETTE_IDX,
+		FIVE_PALETTE_IDX,
+		SIX_PALETTE_IDX,
+		SEVEN_PALETTE_IDX,
+		EIGHT_PALETTE_IDX,
+		NINE_PALETTE_IDX
+	};
+	{
+		std::array<int, 3> score_separate_digits;
+		if (score > 1000) {
+			score_separate_digits = {9, 9, 9};
+		} else {
+			score_separate_digits = {(score / 100) % 10, (score / 10) % 10, score % 10};
+		}
+
+		for (int i = 0; i < SCORE_DISPLAY_WIDTH; i++) {
+			ppu.sprites[score_sprites_begin + i].x = 255 - 8 * 3 + i * 8;
+			ppu.sprites[score_sprites_begin + i].y = 239 - 8;
+			ppu.sprites[score_sprites_begin + i].index = NUMBERS_TILE_IDX.at(score_separate_digits.at(i));
+			ppu.sprites[score_sprites_begin + i].attributes = NUMBERS_PALETTE_IDX.at(score_separate_digits.at(i));
+		}
+	}
+
 	int time_sprites_begin = score_sprites_begin + 3;
-	std::array<int> time_digits = {(int)time_remain/10, (int)time_remain%10};
+	std::array<int,2> time_digits = {(int)time_remain/10, (int)time_remain%10};
 
 	for(int i = 0; i<2;i++){
 		ppu.sprites[i+time_sprites_begin].x = 8*(i+1);
@@ -262,6 +305,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 		ppu.sprites[i+time_sprites_begin].index = NUMBER_TILE_IDX[time_digits[i]];
 		ppu.sprites[i+time_sprites_begin].attributes = NUMBER_PALETTE_IDX[time_digits[i]];
 	}
+
 	
 	//--- actually draw ---
 	ppu.draw(drawable_size);

@@ -26,11 +26,16 @@ struct PlayMode : Mode {
 	int score = 0;
 	double time_remain = 60;
 
+	// time and score
+	int score = 0;
+	double time_remaining = 60;
+
 	//input tracking:
 	struct Button {
 		uint8_t downs = 0;
 		uint8_t pressed = 0;
-	} left, right, down, up, space_key;
+	} left, right,
+	down, up, space_key;
 	// TODO: remove left right down up, if it's not needed -- xiaoqiao
 
 	//some weird background animation:
@@ -44,7 +49,7 @@ struct PlayMode : Mode {
 	double boomerang_holding_time = 0.0; // only used when boomerang == HOLDING
 	static constexpr double BOOMERANG_INIT_SPEED_COEFFICIENT = 300;
 	static constexpr double BOOMERANG_ACCELERATION = 100;
-	const double BOOMERANG_MAX_SPEED = sqrt(256 * 2 * BOOMERANG_ACCELERATION);
+	const double BOOMERANG_MAX_SPEED = sqrt(256 * 1.8 * BOOMERANG_ACCELERATION);
 
 	//fish
 	std::vector<glm::vec2> fish_at;
