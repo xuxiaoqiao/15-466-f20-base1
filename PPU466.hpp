@@ -36,7 +36,7 @@ struct PPU466 {
 	//Background Color:
 	// The PPU clears the screen to the background color before other drawing takes place:
 	// the screen is cleared to this color before any other drawing takes place
-	glm::u8vec3 background_color = glm::u8vec3(0x00, 0x00, 0x00);
+	glm::u8vec3 background_color = glm::u8vec3(0xff, 0xff, 0xff);
 
 	//Palette:
 	// The PPU uses 4-bit indexed color.

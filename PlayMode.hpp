@@ -70,6 +70,9 @@ struct PlayMode : Mode {
 
 	uint8_t num_bomb = 1;
 
+	//cloud
+	std::vector<uint32_t> cloud_idx;
+	uint8_t num_cloud = 10;
 	//----- drawing handled by PPU466 -----
 
 	PPU466 ppu;

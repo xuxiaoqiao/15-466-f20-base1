@@ -24,11 +24,41 @@ PlayMode::PlayMode() {
 	std::copy(palette_input.begin(), palette_input.end(), ppu.palette_table.begin());
 
 	for (uint32_t i = 0; i < ppu.background.size(); ++i) {
-		ppu.background[i] = int16_t(
-			WHITE_PALETTE_IDX << 8
-			| WHITE_TILE_IDX
+		if (i < 128){
+			ppu.background[i] = int16_t(
+				WAVE_DOWN_PALETTE_IDX << 8
+				| WAVE_DOWN_TILE_IDX
+			);
+		} else if (i < 192){
+			ppu.background[i] = int16_t(
+				WAVE_UP_PALETTE_IDX << 8
+				| WAVE_UP_TILE_IDX
+			);
+		} else {
+			ppu.background[i] = int16_t(
+				WHITE_PALETTE_IDX << 8
+				| WHITE_TILE_IDX
+			);
+		}
+	}
+	std::cout << ppu.background.size() << std::endl;
+	for (int i=0; i<num_cloud; i++){
+		static std::mt19937 mt;
+		cloud_idx.push_back((mt()%17+10)*64+mt()%50);
+	}
+
+	for (int i=0; i<cloud_idx.size(); i++){
+		ppu.background[cloud_idx[i]] = int16_t(
+			CLOUD_LEFT_PALETTE_IDX << 8
+			| CLOUD_LEFT_TILE_IDX
+		);
+		ppu.background[cloud_idx[i]+1] = int16_t(
+			CLOUD_RIGHT_PALETTE_IDX << 8
+			| CLOUD_RIGHT_TILE_IDX
 		);
 	}
+
+
 
 	for (uint32_t i=0; i<num_fish; i++){
 		fish_at.push_back(glm::vec2(0.0f, 240.0f));
@@ -160,12 +190,6 @@ void PlayMode::update(float elapsed) {
 	background_fade += elapsed / 10.0f;
 	background_fade -= std::floor(background_fade);
 
-	// constexpr float PlayerSpeed = 30.0f;
-	// if (left.pressed) boomerang_at.x -= PlayerSpeed * elapsed;
-	// if (right.pressed) boomerang_at.x += PlayerSpeed * elapsed;
-	// if (down.pressed) boomerang_at.y -= PlayerSpeed * elapsed;
-	// if (up.pressed) boomerang_at.y += PlayerSpeed * elapsed;
-
 	//reset button press counters:
 	left.downs = 0;
 	right.downs = 0;
@@ -215,14 +239,6 @@ void PlayMode::update(float elapsed) {
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	//--- set ppu state based on game state ---
-
-	//background color will be some hsv-like fade:
-	ppu.background_color = glm::u8vec4(
-		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 0.0f / 3.0f) ) ) ))),
-		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 1.0f / 3.0f) ) ) ))),
-		std::min(255,std::max(0,int32_t(255 * 0.5f * (0.5f + std::sin( 2.0f * M_PI * (background_fade + 2.0f / 3.0f) ) ) ))),
-		0xff
-	);
 
 	// background scroll feature removed
 
