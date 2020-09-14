@@ -288,7 +288,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	};
 	{
 		std::array<int, 3> score_separate_digits;
-		if (score > 1000) {
+		if (score >= 1000) {
 			score_separate_digits = {9, 9, 9};
 		} else {
 			score_separate_digits = {(score / 100) % 10, (score / 10) % 10, score % 10};

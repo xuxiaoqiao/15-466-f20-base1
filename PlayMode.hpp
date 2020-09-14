@@ -47,7 +47,7 @@ struct PlayMode : Mode {
 	double boomerang_holding_time = 0.0; // only used when boomerang == HOLDING
 	static constexpr double BOOMERANG_INIT_SPEED_COEFFICIENT = 300;
 	static constexpr double BOOMERANG_ACCELERATION = 100;
-	const double BOOMERANG_MAX_SPEED = sqrt(256 * 1.8 * BOOMERANG_ACCELERATION);
+	const double BOOMERANG_MAX_SPEED = sqrt(256 * 1.95 * BOOMERANG_ACCELERATION);
 
 	//fish
 	std::vector<glm::vec2> fish_at;
