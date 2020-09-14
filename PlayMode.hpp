@@ -23,12 +23,10 @@ struct PlayMode : Mode {
 	void update_target(std::vector<glm::vec2>& at, std::vector<glm::vec2>& velocity, std::vector<bool>& active, uint8_t num, float elapsed);
 
 	//----- game state -----
-	int score = 0;
-	double time_remain = 60;
-
 	// time and score
 	int score = 0;
-	double time_remaining = 60;
+	double time_remain = 60;
+	bool game_stop = false;
 
 	//input tracking:
 	struct Button {
