@@ -189,7 +189,6 @@ ProcessedSprites process_sprite_images(const std::map<std::string, ImgContent> &
 			}
 		}
 		printf("palette idx for %s: %d\n", name.c_str(), palette_index);
-		// TODO(add check for palettes size too long)
 		// second pass: convert the png content to tiles
 		// TODO(xiaoqiao): is this zero initialization?
 		PPU466::Tile t{};
