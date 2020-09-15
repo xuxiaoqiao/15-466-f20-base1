@@ -12,7 +12,6 @@
 PlayMode::PlayMode() {
 	std::vector<PPU466::Tile> tile_input;
 	std::vector<PPU466::Palette> palette_input;
-	//TODO: decide which kind of path to use
 	std::ifstream tile_stream(data_path("assets/tiles.chunk"), std::ios::binary);
 	std::ifstream palette_stream(data_path("assets/palettes.chunk"), std::ios::binary);
 	if (tile_stream.is_open() && palette_stream.is_open()){
@@ -41,7 +40,6 @@ PlayMode::PlayMode() {
 			);
 		}
 	}
-	std::cout << ppu.background.size() << std::endl;
 	for (int i=0; i<num_cloud; i++){
 		static std::mt19937 mt;
 		cloud_idx.push_back((mt()%17+10)*64+mt()%50);
@@ -181,7 +179,7 @@ void PlayMode::update(float elapsed) {
 	}
 
 	if (boomerang_state == BoomerangState::FLYING) {
-		boomerang_at.x += boomerang_vec_x * elapsed;
+		boomerang_at.x += (float)(boomerang_vec_x * elapsed);
 		boomerang_vec_x -= BOOMERANG_ACCELERATION * elapsed;
 		if (boomerang_at.x <= 0) {
 			boomerang_vec_x = 0;
