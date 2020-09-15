@@ -2,7 +2,7 @@
 
 Author: Xiaoqiao Xu, Zhengyang Xia, Zizhuo Lin
 
-Design: This game allows the player to aim with a boomerang, which has a simple mechanism but is quite uncommon as a projectile in most games. It combines an easy and intuitive mechanism of control with our state-of-the-art<sup>for 1980</sup> physics engine.
+Design: This game allows the player to aim with a boomerang, which has a simple mechanism but is quite uncommon as a projectile in most games. It combines an easy and intuitive mechanism of control with our state-of-the-art<sup> for 1980s</sup> physics engine.
 
 Screen Shot:
 
@@ -21,5 +21,3 @@ Sources: N/A
 This game was built with [NEST](NEST.md).
 
 Disclaimer: this game is definitely about Akuaman, not Aquaman.
-
-å
