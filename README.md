@@ -1,8 +1,8 @@
-# (TODO: your game's title)
+# Akuaman Simulator
 
-Author: (TODO: your name)
+Author: Xiaoqiao Xu, Zhengyang Xia, Zizhuo Lin
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+Design: This game allows the player to aim with a boomerang, which has a simple mechanism but is quite uncommon as a projectile in most games. It combines an easy and intuitive mechanism of control with our state-of-the-art<sup>for 1980</sup> physics engine.
 
 Screen Shot:
 
@@ -14,9 +14,12 @@ How Your Asset Pipeline Works:
 
 How To Play:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+Press and hold the space bar and release to throw the boomerang. Aim for fishes and whales, but not bombs. Try to get the higest score in a limited amount of time!
 
-Sources: (TODO: list a source URL for any assets you did not create yourself. Make sure you have a license for the asset.)
+Sources: N/A
 
 This game was built with [NEST](NEST.md).
 
+Disclaimer: this game is definitely about Akuaman, not Aquaman.
+
+å

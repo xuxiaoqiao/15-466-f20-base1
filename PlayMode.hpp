@@ -32,7 +32,9 @@ struct PlayMode : Mode {
 	struct Button {
 		uint8_t downs = 0;
 		uint8_t pressed = 0;
-	} space_key;
+	} left, right,
+	down, up, space_key;
+	// TODO: remove left right down up, if it's not needed -- xiaoqiao
 
 	//some weird background animation:
 	float background_fade = 0.0f;
