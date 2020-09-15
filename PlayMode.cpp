@@ -45,7 +45,7 @@ PlayMode::PlayMode() {
 		cloud_idx.push_back((mt()%17+10)*64+mt()%50);
 	}
 
-	for (int i=0; i<cloud_idx.size(); i++){
+	for (uint32_t i=0; i<cloud_idx.size(); i++){
 		ppu.background[cloud_idx[i]] = int16_t(
 			CLOUD_LEFT_PALETTE_IDX << 8
 			| CLOUD_LEFT_TILE_IDX
@@ -132,7 +132,7 @@ bool pt_in(float pt_x,float pt_y, glm::vec2 target){
 }
 
 void check_hit(std::vector<glm::vec2>& at, glm::vec2 p, std::vector<bool>& active, int pts, int& score){
-	for(int i = 0; i<at.size();i++){
+	for(uint32_t i = 0; i<at.size();i++){
 		if(at[i].y == 240){
 			continue;
 		}
